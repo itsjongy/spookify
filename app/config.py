@@ -1,6 +1,7 @@
 import os
 import secrets
 
+
 class Config:
     # Use a cryptographically secure random key for the SECRET_KEY
     SECRET_KEY = secrets.token_urlsafe(16)
