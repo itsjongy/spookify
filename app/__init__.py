@@ -1,17 +1,14 @@
 import os
 
-from flask import Flask, render_template, request, session, redirect
+from flask import Flask, request, session, redirect
+from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
 
-from .config import Config
-from .models import db, User
-from .api import (
-    user_routes, auth_routes, product_routes, order_routes, cart_routes
-)
-from .seeds import seed_commands
+from config import Config
 
 app = Flask(__name__, static_folder='../react-app/build', static_url_path='/')
 
@@ -22,7 +19,7 @@ CSRFProtect(app)
 CORS(app, supports_credentials=True)
 
 # setup database
-db.init_app(app)
+db = SQLAlchemy(app)
 Migrate(app, db)
 
 # setup login manager
@@ -33,20 +30,10 @@ login_manager.login_view = 'auth.unauthorized'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# register blueprints
-app.register_blueprint(user_routes, url_prefix='/api/users/')
-app.register_blueprint(auth_routes, url_prefix='/api/auth/')
-app.register_blueprint(product_routes, url_prefix='/api/products/')
-app.register_blueprint(order_routes, url_prefix='/api/orders/')
-app.register_blueprint(cart_routes, url_prefix='/api/cart/')
-
-# add CLI seed commands
-app.cli.add_command(seed_commands)
-
 # enforce https redirect in production
 @app.before_request
 def https_redirect():
-    if os.environ.get('FLASK_ENV') == 'production' and not request.is_secure:
+    if os.environ.get('FLASK_DEBUG') != '1' and not request.is_secure:
         url = request.url.replace('http://', 'https://', 1)
         return redirect(url, code=301)
 

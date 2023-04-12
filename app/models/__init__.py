@@ -1,5 +1,5 @@
-from .db import db
+from app import db
 from .user import User
 from .playlist import Playlist
-from .playlistsong  import Playlist_song
+from .playlistsong import PlaylistSong
 from .song import Song

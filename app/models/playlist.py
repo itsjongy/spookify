@@ -1,5 +1,6 @@
 from datetime import datetime
-from app import db
+
+from . import db
 
 class Playlist(db.Model):
     __tablename__ = 'playlists'
